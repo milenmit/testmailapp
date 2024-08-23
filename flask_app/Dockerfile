@@ -9,17 +9,6 @@ COPY templates/index.html /opt/app
 COPY requirements.txt /opt/app/
 COPY app.py /opt/app/
 
-
-# Install necessary packages
-#RUN apt-get update && \
-#    apt-get install -y \
-#        gcc \
-#        libpq-dev \
-#        default-libmysqlclient-dev \
-#        build-essential \
-
-#        pkg-config && \
-
 #Install python libs/dependencies
 RUN  pip install --no-cache-dir -r requirements.txt
 
