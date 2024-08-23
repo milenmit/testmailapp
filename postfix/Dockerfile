@@ -8,18 +8,6 @@ WORKDIR /opt/app
 COPY email_processor.py /opt/app
 COPY init_postfix.sh /opt/app
 COPY requirements.txt /opt/app
-#COPY conf/main.cf /etc/postfix/main.cf
-#COPY conf/main.cf /etc/postfix/master.cf
-#COPY conf/main.cf /etc/postfix/virtual
-#COPY conf/main.cf /etc/postfix/transport
-# Install additional packages like Postfix, MySQL client, and other utilities
-#RUN apk update && \
-#    apk add --no-cache \
-#        postfix \
-#        mysql-client \
-#        python3-dev \
-#        libffi-dev \
-#        bash
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
