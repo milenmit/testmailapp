@@ -20,7 +20,7 @@ LOAD_UI=True/False<br>
 DOMAIN=SMTP.EXAMPLE.COM<br>
   <p>
   3. Edit  postfix/conf -> main.cf , transport , virtual and in flask_app/templated index.html (change domain). or if you want other properties.<br
-4. Use replece.py script to edit/change domain in all the needed files - > python replace.py (will read DOMAIN from .env file). have in mind it uses python dotenv lib (pip install python-dotenv).<br
+4. Use replece.sh script to edit/change domain in all the needed files - > ./replace.sh (will read DOMAIN from .env file).and change the {{domain}} placeholder in all files (above).<br
 5. Install docker/docker-compose or podman(not tested with podman).<br
 6. Run docker-compose up -d<br>
     <p>
