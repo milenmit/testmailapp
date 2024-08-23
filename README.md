@@ -1,4 +1,6 @@
 <h2>Test mail applicaton</h2>
+<p> Requirements <p>
+  docker-compose , valid domain name and opened port 25(SMTP)
 <p style="font-size: 1.5em;">This mail app is mostly used for automation test purposes, send an email and check wheter an email is received with correct headers/body and so on.
 </p>
 <p style="font-size: 1.5em;">Evertyhing is copy/paste from other sources plus chatgpt, feel free to edit whatever you want. <img src="https://html5-editor.net/images/smiley.png" alt="smiley" /></p>
@@ -15,7 +17,7 @@ DB_CHARSET=utf8mb4<br>
 DB_MAX_CONNECTIONS=7 ## default 5<br>
 API_KEY=test<br>
 LOAD_UI= #True/False<br>
-DOMAIN=example.com<br>
+DOMAIN=SMTP.EXAMPLE.COM<br>
   <p>
   3. Edit  postfix/conf -> main.cf , transport , virtual and in flask_app/templated index.html (change domain). or if you want other properties.<br
 4. Use replece.py script to edit/change domain in all the needed files - > python replace.py (will read DOMAIN from .env file). have in mind it uses python dotenv lib (pip install python-dotenv).<br
