@@ -16,7 +16,7 @@ DB_NAME=emails<br>
 DB_CHARSET=utf8mb4<br>
 DB_MAX_CONNECTIONS=7 ## default 5<br>
 API_KEY=test<br>
-LOAD_UI= #True/False<br>
+LOAD_UI=True/False<br>
 DOMAIN=SMTP.EXAMPLE.COM<br>
   <p>
   3. Edit  postfix/conf -> main.cf , transport , virtual and in flask_app/templated index.html (change domain). or if you want other properties.<br
