@@ -118,7 +118,7 @@
         </div>
     </div>
     <script>
-        const DEFAULT_DOMAIN = '{{domain}}';
+        const DEFAULT_DOMAIN = '{{API_KEY}}';
 
         async function fetchEmails() {
             let toEmail = document.getElementById('to_email').value;
@@ -148,7 +148,7 @@
         }
 
         async function fetchEmailStats() {
-            const apiKey = '{{domain}}';
+            const apiKey = '{{API_KEY}}';
             const url = `/emails/stats?api_key=${apiKey}`;
 
             try {
