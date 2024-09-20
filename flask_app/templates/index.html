@@ -123,7 +123,7 @@
         async function fetchEmails() {
             let toEmail = document.getElementById('to_email').value;
             const limit = document.getElementById('limit').value || 50;
-            const apiKey = 'test';
+            const apiKey = '{{domain}}';
 
             if (!toEmail.includes('@')) {
                 toEmail = `${toEmail}@${DEFAULT_DOMAIN}`;
@@ -148,7 +148,7 @@
         }
 
         async function fetchEmailStats() {
-            const apiKey = 'test';
+            const apiKey = '{{domain}}';
             const url = `/emails/stats?api_key=${apiKey}`;
 
             try {
