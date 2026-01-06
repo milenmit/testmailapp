@@ -104,6 +104,7 @@ def json_serial(obj):
 @require_api_key
 def get_emails():
     to_email = request.args.get('to_email')
+    subject = request.args.get('subject')  # OPTIONAL
     sort_order = request.args.get('sort', 'DESC').upper()
     limit = request.args.get('limit')
     offset = request.args.get('offset', 0)
@@ -120,52 +121,82 @@ def get_emails():
     except ValueError:
         return jsonify({"error": "Limit and offset must be integers"}), 400
 
-    logging.debug(f"to_email: {to_email}, sort_order: {sort_order}, limit: {limit}, offset: {offset}")
+    logging.debug(
+        f"to_email: {to_email}, subject: {subject}, "
+        f"sort_order: {sort_order}, limit: {limit}, offset: {offset}"
+    )
 
     connection = pool.connection()
     try:
         with connection.cursor() as cursor:
-            # Query to get the total count of emails
-            count_sql = "SELECT COUNT(*) as count FROM emails WHERE to_email = %s"
-            cursor.execute(count_sql, (to_email,))
+
+            # ---- WHERE clause ----
+            where_clauses = ["to_email = %s"]
+            query_params = [to_email]
+
+            if subject:
+                where_clauses.append("subject LIKE %s")
+                query_params.append(f"%{subject}%")
+
+            where_sql = " AND ".join(where_clauses)
+
+            # ---- COUNT QUERY ----
+            count_sql = f"""
+                SELECT COUNT(*) AS count
+                FROM emails
+                WHERE {where_sql}
+            """
+            cursor.execute(count_sql, query_params)
             total_count = cursor.fetchone()['count']
 
-            # Query to get emails with sorting, limit, and offset
-            sql = f"SELECT * FROM emails WHERE to_email = %s ORDER BY received_time {sort_order}"
-            query_params = [to_email]
+            # ---- DATA QUERY ----
+            sql = f"""
+                SELECT *
+                FROM emails
+                WHERE {where_sql}
+                ORDER BY received_time {sort_order}
+            """
 
             if limit is not None:
                 sql += " LIMIT %s OFFSET %s"
                 query_params.extend([limit, offset])
             elif offset:
-                sql += " LIMIT 18446744073709551615 OFFSET %s"  # MySQL's maximum limit
+                sql += " LIMIT 18446744073709551615 OFFSET %s"
                 query_params.append(offset)
 
             cursor.execute(sql, query_params)
             emails = cursor.fetchall()
 
             if not emails:
-                return jsonify({"message": "No emails found for the given to_email"}), 404
+                return jsonify({"message": "No emails found"}), 404
 
             email_data = []
+
             for email in emails:
                 email_id = email['id']
 
-                # Query to get email parts
+                # ---- EMAIL PARTS ----
                 sql_parts = "SELECT * FROM email_parts WHERE email_id = %s"
                 cursor.execute(sql_parts, (email_id,))
                 parts = cursor.fetchall()
 
-                # Query to get email attachments
+                # ---- ATTACHMENTS ----
                 sql_attachments = "SELECT * FROM email_attachments WHERE email_id = %s"
                 cursor.execute(sql_attachments, (email_id,))
                 attachments = cursor.fetchall()
 
-                # Ensure raw_headers and parts headers are correctly formatted
-                email['raw_headers'] = escape_json_special_characters(json.loads(email['raw_headers']))
-                email['raw_headers']['to'] = escape_json_special_characters(email['raw_headers'].get('to', ''))
+                # ---- HEADER / CONTENT FIXES ----
+                email['raw_headers'] = escape_json_special_characters(
+                    json.loads(email['raw_headers'])
+                )
+                email['raw_headers']['to'] = escape_json_special_characters(
+                    email['raw_headers'].get('to', '')
+                )
+
                 for part in parts:
-                    part['headers'] = escape_json_special_characters(json.loads(part['headers']))
+                    part['headers'] = escape_json_special_characters(
+                        json.loads(part['headers'])
+                    )
                     part['content'] = decode_unicode_escape(part['content'])
 
                 email_info = {
@@ -173,6 +204,7 @@ def get_emails():
                     "parts": replace_hyphens_in_keys(parts),
                     "attachments": replace_hyphens_in_keys(attachments)
                 }
+
                 email_data.append(email_info)
 
             response_data = {
@@ -186,9 +218,12 @@ def get_emails():
                 response=json.dumps(response_data, default=json_serial, indent=4),
                 mimetype='application/json'
             )
+
             return response
+
     finally:
         connection.close()
+
 
 @app.route('/emails/<int:email_id>', methods=['DELETE'])
 @require_api_key
